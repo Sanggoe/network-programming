@@ -20,8 +20,8 @@ int main(int argc, char *argv[]) {
 	struct sockaddr_in servaddr;
 	char buf[ MAXLINE + 1];
 
-	if(argc != 2) {
-		printf("Usage: %s ip_address\n", argv[0]);
+	if(argc != 3) {
+		printf("Usage: %s ip_address portnumber\n", argv[0]);
 		exit(0);
 	}
 
@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
 	bzero((char*)&servaddr, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
 	inet_pton(AF_INET, argv[1], &servaddr.sin_addr);
-	servaddr.sin_port = htons(3008);
+	servaddr.sin_port = htons(atoi(argv[2]));
 
 	// 연결 요청
 	if (connect(s, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {

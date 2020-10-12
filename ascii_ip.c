@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
 		printf("사용법 : %s IP 주소(dotted decimal) \n", argv[0]);
 		exit(0);
 	}
-	printf("*입력한 dotted decimal IP 주소: %s\n", argv[1]);
+	printf("* 입력한 dotted decimal IP 주소: %s\n", argv[1]);
 
 	inet_pton(AF_INET, argv[1], &inaddr.s_addr);
 	printf(" inet_pton(%s) = 0x%X\n", argv[1], inaddr.s_addr);
