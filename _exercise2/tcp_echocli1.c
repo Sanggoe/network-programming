@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
 	int s, nbyte;
 	struct sockaddr_in servaddr;
 	char buf[MAXLINE + 1];
-
+ 
 	if (argc != 3) {
 		printf("Usage: %s ip_address port_num\n", argv[0]);
 		exit(0);
