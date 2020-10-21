@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
 		perror("write fail");
 		exit(0);
 	}
-
+ 
 	// 데이터 수신 read() 및 출력
 	if ((nbyte = read(s, buf, MAXLINE)) < 0) {
 		perror("read fail");
