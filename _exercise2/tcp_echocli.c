@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
 		perror("socket fail");
 		exit(1);
 	}
-	
+ 	
 	// 에코 서버 소켓주소 구조체 초기화
 	bzero(&servaddr, sizeof(servaddr));
 
