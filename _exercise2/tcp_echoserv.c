@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
 		printf("Usage: %s port\n", argv[0]);
 		exit(0);
 	}
-
+ 
 	// 소켓 생성
 	if ((listen_sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
 		perror("socket fail");
