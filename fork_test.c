@@ -10,7 +10,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 int global_var = 0;	// 전역 변수 선언
-
+ 
 int main(void) {
 	pid_t pid;
 	int local_var = 0;	// 지역 변수 선언
