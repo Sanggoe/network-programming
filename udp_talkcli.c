@@ -9,6 +9,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <netdb.h>
+#include <signal.h>
 
 #define MAXLINE 511
 
@@ -18,8 +19,8 @@ int input_and_send(int sd, struct sockaddr_in servaddr, int addrlen);	// 키보�
 
 int main(int argc, char *argv[]) {
 	pid_t pid;
-	static struct sockaddr_in servaddr;
-	static int s, nbyte, addrlen = sizeof(servaddr);
+	struct sockaddr_in servaddr;
+	int s, nbyte, addrlen = sizeof(servaddr);
 
 	// 명령문 입력 인자 처리
 	if(argc != 3) {
@@ -37,10 +38,10 @@ int main(int argc, char *argv[]) {
 
 	// servaddr 셋팅
 	servaddr.sin_family = AF_INET;
-	inet_pton(AF_INET, argv[1], &servaddr.sin_addr);
+	servaddr.sin_addr.s_addr = inet_addr(argv[1]);
 	servaddr.sin_port = htons(atoi(argv[2]));
 
-	if ( (pid = fork()) > 0) { // 부모 프로세스
+	if ((pid = fork()) > 0) { // 부모 프로세스
 		input_and_send(s, servaddr, addrlen);
 	} else if (pid == 0) { // 자식 프로세스
 		recv_and_print(s, servaddr, &addrlen);
@@ -53,15 +54,14 @@ int main(int argc, char *argv[]) {
 int input_and_send(int sd, struct sockaddr_in servaddr, int addrlen) {
 	char buf[MAXLINE+1];
 	int nbyte;
-
+	
 	while(fgets(buf, sizeof(buf), stdin) != NULL) {
 		nbyte = strlen(buf);
 		if (sendto(sd, buf, strlen(buf), 0, (struct sockaddr*)&servaddr, addrlen) < 0) {
 			perror("sendto fail");
 			close(sd);
 			exit(1);
-                 }
-
+                }
 		// 종료 문자열 처리
 		if (strstr(buf, EXIT_STRING) != NULL) {
 			puts("Good bye.");
@@ -76,9 +76,10 @@ int input_and_send(int sd, struct sockaddr_in servaddr, int addrlen) {
 int recv_and_print(int sd, struct sockaddr_in servaddr, int* addrlen) {
 	char buf[MAXLINE+1];
 	int nbyte;
+	
 	while(1) {
 		if ((nbyte = recvfrom(sd, buf, MAXLINE, 0, (struct sockaddr*)&servaddr, addrlen)) < 0) {
-			perror("read fail");
+			perror("recvfail fail");
 			close(sd);
 			exit(0);
 		}
@@ -87,9 +88,11 @@ int recv_and_print(int sd, struct sockaddr_in servaddr, int* addrlen) {
 		// 종료문자열 수신시 종료
 		if (strstr(buf, EXIT_STRING) != NULL) {
 			puts("Good bye, client! Server out.");
+			close(sd);
+			kill(getppid(), SIGINT);
 			exit(0);
 		}
-		printf("%s", buf); // 화면 출력
+		printf("server: %s", buf); // 화면 출력
 	}
 	return 0;
 }

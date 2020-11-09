@@ -15,10 +15,10 @@ int input_and_send(int sd);	// 키보드로 입력받아 상대에게 전달
 
 #define MAXLINE 511
 
+struct sockaddr_in cliaddr, servaddr;
+
 int main(int argc, char *argv[]) {
-	struct sockaddr_in cliaddr, servaddr;
-	int listen_sock, accp_sock,	// sock number
-	    addrlen = sizeof(cliaddr);
+	int s, addrlen = sizeof(cliaddr);
 	pid_t pid;
 
 	if (argc != 2) {
@@ -27,13 +27,14 @@ int main(int argc, char *argv[]) {
 	}
 	
 	// 소켓 생성
-	if((listen_sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+	if((s = socket(PF_INET, SOCK_DGRAM, 0)) < 0) {
 		perror("socket fail");
 		exit(0);
 	}
 
 	// 소켓 주소 구조체 초기화
 	bzero((struct sockaddr *)&servaddr, addrlen);
+	bzero((struct sockaddr *)&cliaddr, addrlen);
 	
 	// servaddr setting
 	servaddr.sin_family = AF_INET;
@@ -41,33 +42,36 @@ int main(int argc, char *argv[]) {
 	servaddr.sin_port = htons(atoi(argv[1]));
 	
 	// bind() 호출
-	if (bind(listen_sock, (struct sockaddr *)&servaddr, addrlen) < 0) {
+	if (bind(s, (struct sockaddr *)&servaddr, addrlen) < 0) {
 		perror("bind fail");
 		exit(0);
 	}
+	// ready
 	
-	// listen() 호출
-	puts("Server is wating client...");
-	listen(listen_sock, 5);
 
-
-	while(1) {	
-		// accept() 연결 수락
-		if ((accp_sock = accept(listen_sock, (struct sockaddr*)&cliaddr, &addrlen)) < 0) {
-			perror("accept fail");
-			exit(0);
-		}
-	
-		puts("client connected");	
-
-		// fork() 호출
-		if ((pid = fork()) > 0) {	// parent
-			input_and_send(accp_sock);
-		} else if (pid == 0) {		// child
-			recv_and_print(accp_sock);
-		}
+	puts("server wait");	
+		
+	nbyte = recvfrom(s, buf, MAXLINE, 0, (struct sockaddr*)&cliaddr, &addrlen);
+	if(nbyte<0) {
+		perror("recvfrom fail");
+		exit(1);	
 	}
-	close(listen_sock);
+	buf[nbyte] = 0;
+	printf("%d byte recv: %s\n", nbyte, buf);
+
+	if (sendto(s, buf, nbyte, 0, (struct sockaddr*)&cliaddr, addrlen) < 0) {
+		perror("sendto fail");
+		exit(1);
+	}
+	puts("sendto complete");	
+	
+	// fork() 호출
+	if ((pid = fork()) > 0) {	// parent
+		input_and_send(s);
+	 else if (pid == 0) {		// child
+		recv_and_print(s);
+	}
+	close(s);
 		
 	return 0;
 }
@@ -78,8 +82,9 @@ int recv_and_print(int sd) {	// 상대에게 메시지 수신, 출력 - 자식 �
 	int nbyte;
 	
 	while(1) {
-		if ((nbyte = read(sd, buf, MAXLINE)) < 0) {
-			perror("read fail");
+		nbyte = recvfrom(sd, buf, MAXLINE, 0, (struct sockaddr*)&cliaddr, &addrlen);
+		if (nbyte < 0) {
+			perror("recvfrom fail");
 			close(sd);
 			exit(0);
 		}
@@ -101,8 +106,10 @@ int input_and_send(int sd) {	// 키보드로 입력받아 상대에게 전달- �
 
 	while(fgets(buf, sizeof(buf), stdin) != NULL) {
 		nbyte = strlen(buf);
-		write(sd, buf, nbyte);
-		
+		if (sendto(sd, buf, nbyte, 0, (struct sockaddr*)&cliaddr, addrlen) < 0) {
+			perror("sendto fail");
+			exit(1);
+		}
 		if (strstr(buf, EXIT_STRING) != NULL) {
 			puts("Good bye.");
 			break;
