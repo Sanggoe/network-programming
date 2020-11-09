@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
 		exit(0);
 	}
 	printf("%s", buf); // 화면 출력
-
+ 
 
 	if ((pid = fork()) > 0) {
 		input_and_send(s, cliaddr, addrlen);  // 키보드 입력받고 상대에게 메시지 전달

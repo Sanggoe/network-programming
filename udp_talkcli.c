@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
 	pid_t pid;
 	struct sockaddr_in servaddr;
 	int s, nbyte, addrlen = sizeof(servaddr);
-
+ 
 	// 명령문 입력 인자 처리
 	if(argc != 3) {
 		printf("Usage: %s server_ip port_number\n", argv[0]);
