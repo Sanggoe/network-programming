@@ -9,6 +9,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <netdb.h>
+#include <signal.h>
 
 char *EXIT_STRING = "exit";	// 종료문자
 int recv_and_print(int sd, struct sockaddr_in cliaddr, int* addrlen);	// 상대로부터 메시지 수신 후 화면 출력
@@ -20,6 +21,8 @@ int main(int argc, char *argv[]) {
 	struct sockaddr_in cliaddr, servaddr;
 	int s, addrlen = sizeof(struct sockaddr);
 	pid_t pid;
+	char buf[MAXLINE+1];
+	int nbyte;
 
 	if(argc != 2) {
 		printf("Usage: %s port_number\n", argv[0]);
@@ -43,12 +46,30 @@ int main(int argc, char *argv[]) {
 	// bind() 호출
 	if (bind(s, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
 		perror("bind fail");
+		exit(0);
 	}
 	
-	// 일단 해보자. 나중에 추가
-	
-	if ( (pid = fork()) > 0) {
-		input_and_send(s, cliaddr, addrlen);	// 키보드 입력받고 상대에게 메시지 전달
+	puts("server waiting...");
+
+	// 클라이언트로부터 첫 번째 메시지 수신
+	if ((nbyte = recvfrom(s, buf, MAXLINE, 0, (struct sockaddr*)&cliaddr, &addrlen)) < 0) {
+		perror("recvfrom fail");
+		close(s);
+		exit(0);
+	}
+	buf[nbyte] = 0;
+		
+	// 종료문자열 수신시 종료
+	if (strstr(buf, EXIT_STRING) != NULL) {
+		puts("Good bye, server! Client out.");
+		close(s);
+		exit(0);
+	}
+	printf("%s", buf); // 화면 출력
+
+
+	if ((pid = fork()) > 0) {
+		input_and_send(s, cliaddr, addrlen);  // 키보드 입력받고 상대에게 메시지 전달
 	} else if (pid == 0) {
 		recv_and_print(s, cliaddr, &addrlen); // 상대에게 받은 메시지 수신, 출력
 	}
@@ -68,7 +89,6 @@ int input_and_send(int sd, struct sockaddr_in cliaddr, int addrlen) {
 			close(sd);
 			exit(1);
 		}
-		puts("sendto complete");
 
 		// 종료 문자열 처리
 		if (strstr(buf, EXIT_STRING) != NULL) {
@@ -86,7 +106,6 @@ int recv_and_print(int sd, struct sockaddr_in cliaddr, int* addrlen) {
 	int nbyte;
 
 	while(1) {
-		puts("서버가 클라이언트를 기다리고 있습니다.");
 		if ((nbyte = recvfrom(sd, buf, MAXLINE, 0, (struct sockaddr*)&cliaddr, addrlen)) < 0) {
 			perror("recvfrom fail");
 			close(sd);
@@ -97,9 +116,11 @@ int recv_and_print(int sd, struct sockaddr_in cliaddr, int* addrlen) {
 		// 종료문자열 수신시 종료
 		if (strstr(buf, EXIT_STRING) != NULL) {
 			puts("Good bye, server! Client out.");
-                        break;			
+			close(sd);
+			kill(getppid(), SIGINT);
+			exit(0);
 		}
-		printf("%s", buf); // 화면 출력
+		printf("client: %s", buf); // 화면 출력
 	}
 	return 0;
 }
