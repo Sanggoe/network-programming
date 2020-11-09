@@ -1,8 +1,8 @@
 //---------------------------------------------
-// 파일명 : tcp_talkserv.c
+// 파일명 : udp_talkserv.c
 // 기  능 : 토크 클라이언트와 1:1 통신을 한다
-// 컴파일 : cc -o tcp_talkserv tcp_talkserv.c
-// 사용법 : tcp_talkserv 3008
+// 컴파일 : cc -o udp_talkserv udp_talkserv.c
+// 사용법 : udp_talkserv 8008
 //---------------------------------------------
 #include <stdio.h>
 #include <stdlib.h>

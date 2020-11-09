@@ -1,8 +1,8 @@
 //---------------------------------------------
-// 파일명 : tcp_talkcli.c
+// 파일명 : udp_talkcli.c
 // 기  능 : 토크 서버와 1:1 통신을 한다
-// 컴파일 : cc -o tcp_talkcli tcp_talkcli.c
-// 사용법 : tcp_talkcli 127.0.0.1 3008
+// 컴파일 : cc -o udp_talkcli udp_talkcli.c
+// 사용법 : udp_talkcli 127.0.0.1 8008
 //---------------------------------------------
 #include <stdio.h>
 #include <stdlib.h>
