@@ -58,9 +58,9 @@ int main(int argc, char* argv[]) {
 		// 서버로부터 수신한 메시지이면 - 소켓 s의 read_fds 변화이면
 		if(FD_ISSET(s, &read_fds)) {
 			int nbyte;
-			if ((nbyte = recv(s, bufmsg, MAXLINE, 0)) < 0) {
+			if ((nbyte = recv(s, bufmsg, MAXLINE, 0)) > 0) {
 				bufmsg[nbyte] = 0;
-				puts(bufmsg); // 화면 출력
+				printf("%s\n", bufmsg); // 화면 출력
 			}
 		}
 

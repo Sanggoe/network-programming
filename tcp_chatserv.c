@@ -87,9 +87,11 @@ int main(int argc, char* argv[]) {
 				}
 				// 모든 채팅 참가자에게 메시지 방송
 				for(j=0; j<num_chat; j++) {
+					if(j == i) // 내가 보낸 메시지는 수신하면 안되져!
+						continue;
 					send(clisock_list[j], buf, nbyte, 0);
 				}
-				puts(buf);
+				printf("%s\n", buf);
 			}
 		}
 	} // end of while
