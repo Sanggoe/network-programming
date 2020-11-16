@@ -12,7 +12,7 @@
 #include <signal.h>
 
 char *EXIT_STRING = "exit";	// 종료문자
-int recv_and_print(int sd, struct sockaddr_in cliaddr, int* addrlen);	// 상대로부터 메시지 수신 후 화면 출력
+int recv_and_print(int sd, struct sockaddr_in cliaddr, int *addrlen);	// 상대로부터 메시지 수신 후 화면 출력
 int input_and_send(int sd, struct sockaddr_in cliaddr, int addrlen);	// 키보드 입력 받고 상대에게 메시지 전달
 
 #define MAXLINE 511
@@ -59,12 +59,6 @@ int main(int argc, char *argv[]) {
 	}
 	buf[nbyte] = 0;
 		
-	// 종료문자열 수신시 종료
-	if (strstr(buf, EXIT_STRING) != NULL) {
-		puts("Good bye, server! Client out.");
-		close(s);
-		exit(0);
-	}
 	printf("%s", buf); // 화면 출력
 
 
@@ -101,7 +95,7 @@ int input_and_send(int sd, struct sockaddr_in cliaddr, int addrlen) {
 }
 
 // 상대로부터 메시지 수신 후 화면 출력
-int recv_and_print(int sd, struct sockaddr_in cliaddr, int* addrlen) {
+int recv_and_print(int sd, struct sockaddr_in cliaddr, int *addrlen) {
 	char buf[MAXLINE+1];
 	int nbyte;
 
