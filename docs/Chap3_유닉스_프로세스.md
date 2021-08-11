@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
 
 * 프로세스의 메모리 영역과 저장되는 변수 종류 예
 
-![image-20201102164545138](C:/workspace/c/network-programming/docs/image-20201102164545138.png)
+![image-20201102164545138](./imgs/image-20201102164545138.png)
 
 <br/>
 
